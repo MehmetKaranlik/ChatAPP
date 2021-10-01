@@ -12,12 +12,12 @@ import 'package:sizer/sizer.dart';
 import '../views.dart';
 
 class ChatPage extends StatelessWidget {
-  DatabaseMethods _databaseMethods = DatabaseMethods();
-  TextFieldControllers _controllers = TextFieldControllers();
-  Color backgroundColor = AppBarColor().appBarColor;
-  String chatRoomID;
-  String imageUrl;
-  String username;
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
+  final TextFieldControllers _controllers = TextFieldControllers();
+  final Color backgroundColor = AppBarColor().appBarColor;
+  final String chatRoomID;
+  final String imageUrl;
+  final String username;
   ChatPage(
       {Key? key,
       required this.imageUrl,
@@ -31,6 +31,7 @@ class ChatPage extends StatelessWidget {
       "sendBy": Constants.currentUsername!
     };
     _databaseMethods.getConversationMessages(chatRoomID, messageMap);
+    _controllers.chatTextFieldController.clear();
   }
 
   @override
@@ -47,8 +48,8 @@ class ChatPage extends StatelessWidget {
           const Spacer(),
           Container(
             decoration: BoxDecoration(
-              gradient:
-                  LinearGradient(colors: [Colors.white60, Colors.white70]),
+              gradient: const LinearGradient(
+                  colors: [Colors.white60, Colors.white70]),
               color: Colors.grey[600],
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(3.h),
