@@ -25,10 +25,6 @@ class ChatPage extends StatelessWidget {
       required this.chatRoomID})
       : super(key: key);
 
-  /*Widget chatMessageList() {
-     print("anan");
-  }*/
-
   sendMessage() {
     Map<String, String> messageMap = {
       "message": _controllers.chatTextFieldController.text,
