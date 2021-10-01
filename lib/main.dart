@@ -42,7 +42,7 @@ class MyApp extends StatelessWidget {
         ),
         initialRoute: "/",
         getPages: [
-          GetPage(name: "/", page: () => SignUpPage()),
+          GetPage(name: "/", page: () => directedPage),
         ],
       );
     });

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:chat_app_example/controllers/controllers.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -41,5 +43,14 @@ class DatabaseMethods {
         .doc(chatRoomID)
         .set(chatRoomMap)
         .catchError((e) => print(e));
+  }
+
+  getConversationMessages(String chatRoomID, Map<String, String> messageMap) {
+    FirebaseFirestore.instance
+        .collection("chatRoom")
+        .doc(chatRoomID)
+        .collection("chats")
+        .add(messageMap)
+        .catchError((e) => print(e.toString()));
   }
 }

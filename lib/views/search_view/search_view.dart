@@ -116,7 +116,8 @@ class _SearchPageState extends State<SearchPage> {
       };
 
       await databaseMethods.createChatRoom(getChatRoomID, chatRoomMap);
-      Get.off(() => ChatPage(imageUrl: "", username: user[1]));
+      Get.off(() =>
+          ChatPage(imageUrl: "", username: user[1], chatRoomID: getChatRoomID));
     } else {
       print("username=currentusername");
     }
