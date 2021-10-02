@@ -78,16 +78,6 @@ class _ChatPageState extends State<ChatPage> {
     super.initState();
   }
 
-  //  Future<void> asyncInitState() async {
-  //   var futureMessageStream =
-  //       await _databaseMethods.getConversationMessages(widget.chatRoomID);
-  //   print(futureMessageStream);
-  //   setState(() {
-  //     chatMessageStream = futureMessageStream;
-  //     print(chatMessageStream);
-  //   });
-  // }
-
   Stream chatStream() {
     return _databaseMethods.getConversationMessages(widget.chatRoomID);
   }

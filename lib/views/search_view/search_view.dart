@@ -9,19 +9,19 @@ import 'package:chat_app_example/views/views.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
 import 'package:sizer/sizer.dart';
 import 'package:chat_app_example/services/database/database.dart';
 
 class SearchPage extends StatefulWidget {
-  SearchPage({Key? key}) : super(key: key);
-  DatabaseMethods databaseMethods = DatabaseMethods();
+  const SearchPage({Key? key}) : super(key: key);
   @override
   State<SearchPage> createState() => _SearchPageState();
 }
 
 class _SearchPageState extends State<SearchPage> {
   String appUser = Constants.currentUsername.toString();
-  DatabaseMethods databaseMethods = DatabaseMethods();
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
   CollectionReference users = FirebaseFirestore.instance.collection('users');
   final obxController = Get.put(IsSearchedController());
   final TextFieldControllers _controllerInstance = TextFieldControllers();
@@ -89,7 +89,7 @@ class _SearchPageState extends State<SearchPage> {
                     itemCount: snapshotData!.docs.length,
                     itemBuilder: (context, index) {
                       return SearchTile(
-                        onPressed: _buildOnPressed,
+                        onPressed: _buildMessageButtonOnPressed,
                         imageUrl: "",
                         username: snapshotData!.docs[index].data()["name"],
                         email: snapshotData!.docs[index].data()["email"],
@@ -102,22 +102,24 @@ class _SearchPageState extends State<SearchPage> {
     );
   }
 
-  _buildOnPressed() async {
-    String userName = _controllerInstance.searchTextFieldController.text;
+  _buildMessageButtonOnPressed() async {
+    String userName = snapshotData!.docs[0].data()["name"];
+    String? _uniqueID;
 
-    List<String> user = [Constants.currentUsername.toString(), userName];
     if (Constants.currentUsername != userName) {
-      String getChatRoomID = databaseMethods.getChatRoomId(
-          Constants.currentUsername.toString(), userName);
-
-      Map<String, dynamic> chatRoomMap = {
-        "users": user,
-        "chatRommId": getChatRoomID,
+      Map<String, String> members = {
+        "user1": Constants.currentUsername!,
+        "user2": userName
       };
+      await _databaseMethods.checkSharedRoom(members);
 
-      await databaseMethods.createChatRoom(getChatRoomID, chatRoomMap);
+      //print(await _databaseMethods.checkSharedRoom(userName));
+
+      // await _databaseMethods
+      //   .createBinaryChatRoom(members); //create docs in "chatRoom" Collection
+      _uniqueID = await _databaseMethods.getConversationUniqueID(members);
       Get.off(() =>
-          ChatPage(imageUrl: "", username: user[1], chatRoomID: getChatRoomID));
+          ChatPage(imageUrl: "", username: userName, chatRoomID: _uniqueID!));
     } else {
       print("username=currentusername");
     }

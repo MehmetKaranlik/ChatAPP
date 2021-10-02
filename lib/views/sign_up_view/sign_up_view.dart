@@ -15,7 +15,7 @@ class SignUpPage extends StatelessWidget {
   final DatabaseMethods databaseMethod = DatabaseMethods();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final obxController = Get.put(IsLoadingController());
-  final TextFieldControllers _ControllerInstance = TextFieldControllers();
+  final TextFieldControllers _controllerInstance = TextFieldControllers();
 
   signUserUp(BuildContext context) async {
     // function to sign up > placed to sign up button
@@ -23,28 +23,28 @@ class SignUpPage extends StatelessWidget {
       obxController.changeIsLoading();
 
       final UserID result = await authMethods.signUpWithEmailAndPassword(
-          _ControllerInstance.emailTextFieldController.text,
-          _ControllerInstance.passwordTextFieldController.text);
+          _controllerInstance.emailTextFieldController.text,
+          _controllerInstance.passwordTextFieldController.text);
 
       if (result == null) {
         obxController.changeIsLoading();
-        _ControllerInstance.usernameTextFieldController.clear();
-        _ControllerInstance.emailTextFieldController.clear();
-        _ControllerInstance.passwordTextFieldController.clear();
-        _ControllerInstance.confirmPasswordTextFieldController.clear();
+        _controllerInstance.usernameTextFieldController.clear();
+        _controllerInstance.emailTextFieldController.clear();
+        _controllerInstance.passwordTextFieldController.clear();
+        _controllerInstance.confirmPasswordTextFieldController.clear();
         ScaffoldMessenger.of(context)
             .showSnackBar(Constants.RegisterErrorSnackBar);
       } else {
         HelperFunctions.saveUserEmailSharedPreferences(
-            _ControllerInstance.emailTextFieldController.text);
+            _controllerInstance.emailTextFieldController.text);
 
         HelperFunctions.saveUserPasswordSharedPreferences(
-            _ControllerInstance.passwordTextFieldController.text);
+            _controllerInstance.passwordTextFieldController.text);
         HelperFunctions.saveUserNameSharedPreferences(
-            _ControllerInstance.usernameTextFieldController.text);
+            _controllerInstance.usernameTextFieldController.text);
         Map<String, dynamic> userInfo = {
-          "name": _ControllerInstance.usernameTextFieldController.text,
-          "email": _ControllerInstance.emailTextFieldController.text,
+          "name": _controllerInstance.usernameTextFieldController.text,
+          "email": _controllerInstance.emailTextFieldController.text,
         };
         await databaseMethod.upLoadUserInfo(userInfo);
         obxController.changeIsLoading();
@@ -99,28 +99,28 @@ class SignUpPage extends StatelessWidget {
                             child: Column(
                               children: [
                                 CustomTextFieldUsername(
-                                  controller: _ControllerInstance
+                                  controller: _controllerInstance
                                       .usernameTextFieldController,
                                   fontSize: 13.sp,
                                   hintText: "Username",
                                   obscure: false,
                                 ),
                                 CustomTextFieldEmail(
-                                  controller: _ControllerInstance
+                                  controller: _controllerInstance
                                       .emailTextFieldController,
                                   fontSize: 13.sp,
                                   hintText: "E-mail",
                                   obscure: false,
                                 ),
                                 CustomTextFieldPassword(
-                                  controller: _ControllerInstance
+                                  controller: _controllerInstance
                                       .passwordTextFieldController,
                                   fontSize: 13.sp,
                                   hintText: "Password",
                                   obscure: true,
                                 ),
                                 CustomTextFieldPasswordConfirm(
-                                  controller: _ControllerInstance
+                                  controller: _controllerInstance
                                       .confirmPasswordTextFieldController,
                                   fontSize: 13.sp,
                                   hintText: "Type your password again",
