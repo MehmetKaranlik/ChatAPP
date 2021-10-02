@@ -3,6 +3,7 @@ import 'package:chat_app_example/controllers/controllers.dart';
 import 'package:chat_app_example/models/models.dart';
 import 'package:chat_app_example/global_widgets/global_widgets.dart';
 import 'package:chat_app_example/services/database/database.dart';
+import 'package:chat_app_example/views/chat_view.dart/chat_view_widgets/message_tile.dart';
 import 'package:chat_app_example/views/rooms_view/rooms_widgets/search_button.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import "package:flutter/material.dart";
@@ -11,10 +12,7 @@ import 'package:sizer/sizer.dart';
 
 import '../views.dart';
 
-class ChatPage extends StatelessWidget {
-  final DatabaseMethods _databaseMethods = DatabaseMethods();
-  final TextFieldControllers _controllers = TextFieldControllers();
-  final Color backgroundColor = AppBarColor().appBarColor;
+class ChatPage extends StatefulWidget {
   final String chatRoomID;
   final String imageUrl;
   final String username;
@@ -25,13 +23,73 @@ class ChatPage extends StatelessWidget {
       required this.chatRoomID})
       : super(key: key);
 
+  @override
+  State<ChatPage> createState() => _ChatPageState();
+}
+
+class _ChatPageState extends State<ChatPage> {
+  final DatabaseMethods _databaseMethods = DatabaseMethods();
+  final TextFieldControllers _controllers = TextFieldControllers();
+  final Color backgroundColor = AppBarColor().appBarColor;
+  Stream? chatMessageStream;
+  Widget chatList() {
+    return StreamBuilder(
+      stream: chatStream(),
+      builder: (context, AsyncSnapshot snapshot) {
+        if (snapshot.hasData) {
+          return ListView.builder(
+            shrinkWrap: true,
+            itemCount: (snapshot.data as QuerySnapshot).docs.length,
+            itemBuilder: (context, index) {
+              print((snapshot.data as QuerySnapshot).docs[index]["message"]);
+              return MessageTile(
+                message: (snapshot.data as QuerySnapshot).docs[index]
+                    ["message"],
+                isSendByMe: (snapshot.data as QuerySnapshot).docs[index]
+                        ["sendBy"] ==
+                    Constants.currentUsername,
+              );
+            },
+          );
+        } else {
+          return const SizedBox();
+        }
+      },
+    );
+  }
+
   sendMessage() {
-    Map<String, String> messageMap = {
+    Map<String, dynamic> messageMap = {
       "message": _controllers.chatTextFieldController.text,
-      "sendBy": Constants.currentUsername!
-    };
-    _databaseMethods.getConversationMessages(chatRoomID, messageMap);
+      "sendBy": Constants.currentUsername!,
+      "timeStamp": DateTime.now().millisecondsSinceEpoch,
+    }; //Message Model Map
+    if (_controllers.chatTextFieldController.text.isNotEmpty) {
+      _databaseMethods.addConversationMessages(
+        widget.chatRoomID,
+        messageMap,
+      );
+    }
     _controllers.chatTextFieldController.clear();
+  } // sending a message
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  //  Future<void> asyncInitState() async {
+  //   var futureMessageStream =
+  //       await _databaseMethods.getConversationMessages(widget.chatRoomID);
+  //   print(futureMessageStream);
+  //   setState(() {
+  //     chatMessageStream = futureMessageStream;
+  //     print(chatMessageStream);
+  //   });
+  // }
+
+  Stream chatStream() {
+    return _databaseMethods.getConversationMessages(widget.chatRoomID);
   }
 
   @override
@@ -41,48 +99,54 @@ class ChatPage extends StatelessWidget {
       appBar: _buildAppBar(),
       body: Column(
         children: [
-          Container(
-            width: 100.w,
-            child: Column(), //text section
-          ),
-          const Spacer(),
-          Container(
-            decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                  colors: [Colors.white60, Colors.white70]),
-              color: Colors.grey[600],
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(3.h),
-                topRight: Radius.circular(3.h),
-              ),
-            ),
-            child: Row(
-              children: [
-                _buildTextFormField(_controllers.chatTextFieldController),
-                IconButton(
-                  onPressed: () {
-                    if (_controllers.chatTextFieldController.text != null) {
-                      sendMessage();
-                    }
-                  },
-                  icon: ShaderMask(
-                    shaderCallback: (bounds) {
-                      return const LinearGradient(colors: [
-                        Colors.purple,
-                        Colors.cyan,
-                      ]).createShader(bounds);
-                    },
-                    child: Icon(
-                      Icons.send,
-                      size: 9.w,
-                      color: Colors.white,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          Expanded(child: chatList()),
+
+          _buildTextFieldAndSendButton(), // TextField and Send message button
         ],
+      ),
+    );
+  }
+
+  Container _buildTextFieldAndSendButton() {
+    return Container(
+      height: 10.h,
+      decoration: BoxDecoration(
+        gradient:
+            const LinearGradient(colors: [Colors.white60, Colors.white70]),
+        color: Colors.grey[600],
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(3.h),
+          topRight: Radius.circular(3.h),
+        ),
+      ),
+      child: Row(
+        children: [
+          _buildTextFormField(_controllers.chatTextFieldController),
+          _buildSendButton(),
+        ],
+      ),
+    );
+  }
+
+  IconButton _buildSendButton() {
+    return IconButton(
+      onPressed: () {
+        if (_controllers.chatTextFieldController.text != null) {
+          sendMessage();
+        }
+      },
+      icon: ShaderMask(
+        shaderCallback: (bounds) {
+          return const LinearGradient(colors: [
+            Colors.purple,
+            Colors.cyan,
+          ]).createShader(bounds);
+        },
+        child: Icon(
+          Icons.send,
+          size: 9.w,
+          color: Colors.white,
+        ),
       ),
     );
   }
@@ -99,7 +163,7 @@ class ChatPage extends StatelessWidget {
             Get.off(() => RoomPage());
           }),
           SizedPlaceHolder(height: 3.h, width: 6.w, color: Colors.transparent),
-          CustomCircularAvatar(imageUrl: imageUrl, size: 6.w),
+          CustomCircularAvatar(imageUrl: widget.imageUrl, size: 6.w),
         ],
       ),
       actions: [
@@ -112,7 +176,7 @@ class ChatPage extends StatelessWidget {
       ],
       backgroundColor: const Color(0xff1F1F1F),
       title: Text(
-        username,
+        widget.username,
         style: TextStyle(
           color: Colors.grey[600],
         ),

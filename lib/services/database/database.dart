@@ -37,20 +37,30 @@ class DatabaseMethods {
     }
   }
 
-  createChatRoom(String chatRoomID, chatRoomMap) {
-    FirebaseFirestore.instance
+  createChatRoom(String chatRoomID, chatRoomMap) async {
+    await FirebaseFirestore.instance
         .collection("chatRoom")
         .doc(chatRoomID)
         .set(chatRoomMap)
         .catchError((e) => print(e));
   }
 
-  getConversationMessages(String chatRoomID, Map<String, String> messageMap) {
-    FirebaseFirestore.instance
+  addConversationMessages(
+      String chatRoomID, Map<String, dynamic> messageMap) async {
+    await FirebaseFirestore.instance
         .collection("chatRoom")
         .doc(chatRoomID)
         .collection("chats")
         .add(messageMap)
         .catchError((e) => print(e.toString()));
+  }
+
+  Stream getConversationMessages(String chatRoomID) {
+    return FirebaseFirestore.instance
+        .collection("chatRoom")
+        .doc(chatRoomID)
+        .collection("chats")
+        .orderBy("timeStamp", descending: false)
+        .snapshots();
   }
 }

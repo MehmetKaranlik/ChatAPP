@@ -159,7 +159,8 @@ class _SearchPageState extends State<SearchPage> {
       backgroundColor: const Color(0xff1F1F1F),
       title: Text(
         "ChatApp",
-        style: TextStyle(foreground: Paint()..shader = linearGradient),
+        style: TextStyle(
+            foreground: Paint()..shader = AppBarColor().linearGradient),
       ),
     );
   }
