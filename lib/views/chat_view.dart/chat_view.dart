@@ -28,6 +28,7 @@ class ChatPage extends StatefulWidget {
 }
 
 class _ChatPageState extends State<ChatPage> {
+  final ScrollController _controller = ScrollController();
   final DatabaseMethods _databaseMethods = DatabaseMethods();
   final TextFieldControllers _controllers = TextFieldControllers();
   final Color backgroundColor = AppBarColor().appBarColor;
@@ -38,10 +39,10 @@ class _ChatPageState extends State<ChatPage> {
       builder: (context, AsyncSnapshot snapshot) {
         if (snapshot.hasData) {
           return ListView.builder(
-            shrinkWrap: true,
+            controller: _controller,
+            shrinkWrap: false,
             itemCount: (snapshot.data as QuerySnapshot).docs.length,
             itemBuilder: (context, index) {
-              print((snapshot.data as QuerySnapshot).docs[index]["message"]);
               return MessageTile(
                 message: (snapshot.data as QuerySnapshot).docs[index]
                     ["message"],
@@ -69,14 +70,14 @@ class _ChatPageState extends State<ChatPage> {
         widget.chatRoomID,
         messageMap,
       );
+      _controller.animateTo(_controller.position.maxScrollExtent + 500,
+          duration: Duration(milliseconds: 500), curve: Curves.easeInOut);
     }
     _controllers.chatTextFieldController.clear();
   } // sending a message
 
   @override
-  void initState() {
-    super.initState();
-  }
+  void initState() {}
 
   Stream chatStream() {
     return _databaseMethods.getConversationMessages(widget.chatRoomID);
@@ -85,12 +86,15 @@ class _ChatPageState extends State<ChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       backgroundColor: backgroundColor,
       appBar: _buildAppBar(),
       body: Column(
         children: [
           Expanded(child: chatList()),
-
+          Divider(
+            height: 1.h,
+          ),
           _buildTextFieldAndSendButton(), // TextField and Send message button
         ],
       ),
@@ -121,7 +125,7 @@ class _ChatPageState extends State<ChatPage> {
   IconButton _buildSendButton() {
     return IconButton(
       onPressed: () {
-        if (_controllers.chatTextFieldController.text != null) {
+        if (_controllers.chatTextFieldController.text.trimRight() != null) {
           sendMessage();
         }
       },

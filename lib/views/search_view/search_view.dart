@@ -113,11 +113,13 @@ class _SearchPageState extends State<SearchPage> {
       };
       await _databaseMethods.checkSharedRoom(members);
 
-      //print(await _databaseMethods.checkSharedRoom(userName));
+      //print(await _databaseMethods.checkSharedRoom(members));
 
-      // await _databaseMethods
-      //   .createBinaryChatRoom(members); //create docs in "chatRoom" Collection
+      /*   await _databaseMethods
+          .createBinaryChatRoom(members); //create docs in "chatRoom" Collection*/
       _uniqueID = await _databaseMethods.getConversationUniqueID(members);
+      print(_uniqueID);
+      print(_uniqueID);
       Get.off(() =>
           ChatPage(imageUrl: "", username: userName, chatRoomID: _uniqueID!));
     } else {

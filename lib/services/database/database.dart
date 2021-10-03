@@ -95,18 +95,11 @@ class DatabaseMethods {
 
     if (checkUniqUsername.docs.isEmpty && checkUniqqUsername.docs.isEmpty) {
       await createBinaryChatRoom(users);
-    } else {
-      if (checkUniqUsername.docs.isEmpty) {
-        checkResult = checkUniqqUsername.docs[0].id;
-      } else {
-        checkResult = checkUniqUsername.docs[0].id;
-      }
     }
-    print(checkResult);
   }
 
   getConversationUniqueID(Map<String, String> users) async {
-    String uniqueID;
+    String? uniqueID;
 
     QuerySnapshot<Map<String, dynamic>> scenario1 = await firebaseFirestore
         .collection("chatRoom")
@@ -120,10 +113,12 @@ class DatabaseMethods {
         .where('user1', isEqualTo: users['user2'])
         .get();
 
-    if (await scenario1 == null) {
-      return uniqueID = await scenario2.docs[0].id;
-    } else {
-      return uniqueID = scenario1.docs[0].id;
+    if (scenario1.docs.length != 0) {
+      uniqueID = scenario1.docs[0].id;
     }
+    if (scenario2.docs.length != 0) {
+      uniqueID = scenario2.docs[0].id;
+    }
+    return uniqueID;
   }
 }
